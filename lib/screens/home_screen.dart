@@ -41,10 +41,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _tasks.add(newTask);
     });
     _storageService.saveTasks(_tasks);
-    // TODO: Panggil NotificationService.schedule(newTask) di sini nanti
   }
 
-  // Update Status ke Finished
   void _markAsDone(int id) {
     setState(() {
       _tasks.firstWhere((t) => t.id == id).isFinished = true;
@@ -52,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _storageService.saveTasks(_tasks);
   }
 
-  // Hapus Task
   void _deleteTask(int id) {
     setState(() {
       _tasks.removeWhere((t) => t.id == id);
@@ -102,7 +99,9 @@ class _HomeScreenState extends State<HomeScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: isFinished ? Colors.green.withOpacity(0.2) : Colors.blue.withOpacity(0.2),
+            color: isFinished
+                ? Colors.green.withOpacity(0.2)
+                : Colors.blue.withOpacity(0.2),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -122,7 +121,9 @@ class _HomeScreenState extends State<HomeScreen> {
               return Card(
                 elevation: 2,
                 margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(12),
                   title: Text(
@@ -134,13 +135,25 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text(task.desc),
                       const SizedBox(height: 8),
+                      // Baris 139 di kode ente mestinya bagian ini:
                       Row(
                         children: [
-                          const Icon(Icons.calendar_month, size: 14, color: Colors.grey),
+                          const Icon(
+                            Icons.calendar_month,
+                            size: 14,
+                            color: Colors.grey,
+                          ),
                           const SizedBox(width: 4),
-                          Text(
-                            "${task.deadline.day}/${task.deadline.month}/${task.deadline.year}",
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          Expanded(
+                            child: Text(
+                              "${task.deadline.day}/${task.deadline.month}/${task.deadline.year}",
+                              overflow: TextOverflow
+                                  .ellipsis, 
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -151,12 +164,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       if (!isFinished)
                         IconButton(
-                          icon: const Icon(Icons.check_circle_outline, color: Colors.green),
+                          icon: const Icon(
+                            Icons.check_circle_outline,
+                            color: Colors.green,
+                          ),
                           onPressed: () => _markAsDone(task.id),
                         )
                       else
                         IconButton(
-                          icon: const Icon(Icons.delete_outline, color: Colors.red),
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.red,
+                          ),
                           onPressed: () => _deleteTask(task.id),
                         ),
                     ],
@@ -170,7 +189,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Dialog buat input task baru
   void _showAddTaskDialog(BuildContext context) {
     final titleController = TextEditingController();
     final descController = TextEditingController();
@@ -184,8 +202,15 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: titleController, decoration: const InputDecoration(labelText: "Task Title")),
-              TextField(controller: descController, decoration: const InputDecoration(labelText: "Description")),
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: "Task Title"),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: descController,
+                decoration: const InputDecoration(labelText: "Description"),
+              ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 icon: const Icon(Icons.date_range),
@@ -204,11 +229,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
           ElevatedButton(
             onPressed: () {
               if (titleController.text.isNotEmpty) {
-                _addNewTask(titleController.text, descController.text, selectedDate);
+                _addNewTask(
+                  titleController.text,
+                  descController.text,
+                  selectedDate,
+                );
                 Navigator.pop(context);
               }
             },
