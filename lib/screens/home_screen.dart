@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/task_models.dart';
 import '../services/storage_service.dart';
+import '../services/notification_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,9 +12,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final StorageService _storageService = StorageService();
+  final NotificationService _notificationService = NotificationService();
   List<Task> _tasks = [];
   bool _isLoading = true;
-  
+
   // State untuk kontrol kategori mana yang tampil (To Do / Finished)
   bool _showFinishedCategory = false;
 
@@ -21,6 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadAllTasks();
+    _notificationService.init();
   }
 
   // 1. Load data dari JSON
@@ -44,6 +47,16 @@ class _HomeScreenState extends State<HomeScreen> {
       _tasks.add(newTask);
     });
     _storageService.saveTasks(_tasks);
+
+    final reminderTime = deadline.subtract(const Duration(days: 1));
+    if (reminderTime.isAfter(DateTime.now())) {
+      _notificationService.scheduleNotification(
+        id: newTask.id,
+        title: "H-1 Deadline: $title",
+        body: "Tommorow is the due date",
+        scheduledDate: reminderTime,
+      );
+    }
   }
 
   // 3. Fungsi Tandai Selesai
@@ -60,6 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _tasks.removeWhere((t) => t.id == id);
     });
     _storageService.saveTasks(_tasks);
+    _notificationService.cancelNotification(id);
   }
 
   // 5. Fungsi Tampilkan Dialog Input (Ini jg tadi bikin merah)
@@ -83,7 +97,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: const InputDecoration(
                   labelText: "Task Title",
                   labelStyle: TextStyle(color: Colors.grey),
-                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.purpleAccent)),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.purpleAccent),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -93,7 +109,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: const InputDecoration(
                   labelText: "Description",
                   labelStyle: TextStyle(color: Colors.grey),
-                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.purpleAccent)),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.purpleAccent),
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
@@ -122,7 +140,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ElevatedButton(
             onPressed: () {
               if (titleController.text.isNotEmpty) {
-                _addNewTask(titleController.text, descController.text, selectedDate);
+                _addNewTask(
+                  titleController.text,
+                  descController.text,
+                  selectedDate,
+                );
                 Navigator.pop(context);
               }
             },
@@ -142,11 +164,13 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_isLoading) {
       return const Scaffold(
         backgroundColor: Color(0xFF121212),
-        body: Center(child: CircularProgressIndicator())
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
-    final currentTasks = _tasks.where((t) => t.isFinished == _showFinishedCategory).toList();
+    final currentTasks = _tasks
+        .where((t) => t.isFinished == _showFinishedCategory)
+        .toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
@@ -165,16 +189,40 @@ class _HomeScreenState extends State<HomeScreen> {
             const Icon(Icons.apps, size: 64, color: Colors.purpleAccent),
             const SizedBox(height: 20),
             ListTile(
-              leading: Icon(Icons.playlist_add_check_rounded, color: !_showFinishedCategory ? Colors.purpleAccent : Colors.white70),
-              title: Text("To Do List", style: TextStyle(color: !_showFinishedCategory ? Colors.purpleAccent : Colors.white70)),
+              leading: Icon(
+                Icons.playlist_add_check_rounded,
+                color: !_showFinishedCategory
+                    ? Colors.purpleAccent
+                    : Colors.white70,
+              ),
+              title: Text(
+                "To Do List",
+                style: TextStyle(
+                  color: !_showFinishedCategory
+                      ? Colors.purpleAccent
+                      : Colors.white70,
+                ),
+              ),
               onTap: () {
                 setState(() => _showFinishedCategory = false);
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              leading: Icon(Icons.done_all_rounded, color: _showFinishedCategory ? Colors.greenAccent : Colors.white70),
-              title: Text("Finished Board", style: TextStyle(color: _showFinishedCategory ? Colors.greenAccent : Colors.white70)),
+              leading: Icon(
+                Icons.done_all_rounded,
+                color: _showFinishedCategory
+                    ? Colors.greenAccent
+                    : Colors.white70,
+              ),
+              title: Text(
+                "Finished Board",
+                style: TextStyle(
+                  color: _showFinishedCategory
+                      ? Colors.greenAccent
+                      : Colors.white70,
+                ),
+              ),
               onTap: () {
                 setState(() => _showFinishedCategory = true);
                 Navigator.pop(context);
@@ -196,14 +244,18 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               decoration: BoxDecoration(
-                color: _showFinishedCategory ? Colors.green.withOpacity(0.1) : Colors.purple.withOpacity(0.1),
+                color: _showFinishedCategory
+                    ? Colors.green.withOpacity(0.1)
+                    : Colors.purple.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 "${_showFinishedCategory ? "Done" : "Tasks"} (${currentTasks.length})",
                 style: TextStyle(
-                  fontWeight: FontWeight.bold, 
-                  color: _showFinishedCategory ? Colors.greenAccent : Colors.purpleAccent
+                  fontWeight: FontWeight.bold,
+                  color: _showFinishedCategory
+                      ? Colors.greenAccent
+                      : Colors.purpleAccent,
                 ),
               ),
             ),
@@ -216,26 +268,45 @@ class _HomeScreenState extends State<HomeScreen> {
                   return Card(
                     color: const Color(0xFF1E1E1E),
                     margin: const EdgeInsets.only(bottom: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
                     child: ListTile(
                       contentPadding: const EdgeInsets.all(16),
                       title: Text(
-                        task.title, 
-                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18)
+                        task.title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 8),
-                          Text(task.desc, style: const TextStyle(color: Colors.white70, fontSize: 14)), 
+                          Text(
+                            task.desc,
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
+                          ),
                           const SizedBox(height: 12),
                           Row(
                             children: [
-                              const Icon(Icons.calendar_month, size: 16, color: Colors.grey),
+                              const Icon(
+                                Icons.calendar_month,
+                                size: 16,
+                                color: Colors.grey,
+                              ),
                               const SizedBox(width: 6),
                               Text(
                                 "${task.deadline.day}/${task.deadline.month}/${task.deadline.year}",
-                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ],
                           ),
@@ -243,11 +314,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       trailing: IconButton(
                         icon: Icon(
-                          _showFinishedCategory ? Icons.delete_sweep : Icons.check_circle,
-                          color: _showFinishedCategory ? Colors.redAccent : Colors.greenAccent,
+                          _showFinishedCategory
+                              ? Icons.delete_sweep
+                              : Icons.check_circle,
+                          color: _showFinishedCategory
+                              ? Colors.redAccent
+                              : Colors.greenAccent,
                           size: 28,
                         ),
-                        onPressed: () => _showFinishedCategory ? _deleteTask(task.id) : _markAsDone(task.id),
+                        onPressed: () => _showFinishedCategory
+                            ? _deleteTask(task.id)
+                            : _markAsDone(task.id),
                       ),
                     ),
                   );
