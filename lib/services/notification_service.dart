@@ -22,8 +22,7 @@ class NotificationService {
 
     await _notifications.initialize(
       settings: settings,
-      onDidReceiveNotificationResponse: (NotificationResponse details) {
-      },
+      onDidReceiveNotificationResponse: (NotificationResponse details) {},
     );
 
     await _notifications
@@ -39,8 +38,6 @@ class NotificationService {
     required String body,
     required DateTime scheduledDate,
   }) async {
-    // FIX BARIS 56 & 62: Di versi 21, 'uiLocalNotificationDateInterpretation' SUDAH DIHAPUS
-    // Dan semua parameter wajib pake labelnya (id:, title:, dsb)
     await _notifications.zonedSchedule(
       id: id,
       title: title,
@@ -52,11 +49,9 @@ class NotificationService {
           'Deadline Reminders',
           importance: Importance.max,
           priority: Priority.high,
-          ticker: 'ticker',
         ),
       ),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      // Parameter uiLocalNotificationDateInterpretation dibuang aja Gan, udah gak ada
     );
   }
 
