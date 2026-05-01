@@ -231,11 +231,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddTaskDialog(context),
-        backgroundColor: Colors.purpleAccent,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      floatingActionButton: _showFinishedCategory
+          ? null
+          : FloatingActionButton(
+              onPressed: () => _showAddTaskDialog(context),
+              backgroundColor: Colors.purpleAccent,
+              child: const Icon(Icons.add, color: Colors.white),
+            ),
       body: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(

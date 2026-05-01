@@ -66,16 +66,16 @@ class _MainLayoutState extends State<MainLayout> {
                 label: Text('Home'),
               ),
               NavigationRailDestination(
+                icon: Icon(Icons.edit_note_outlined),
+                selectedIcon: Icon(Icons.edit_note),
+                label: Text('Notes'),
+              ),
+              NavigationRailDestination(
                 icon: Icon(Icons.settings_outlined),
                 selectedIcon: Icon(Icons.settings),
                 label: Text('Settings'),
               ),
               // Tambahin destinasi buat Notes
-              NavigationRailDestination(
-                icon: Icon(Icons.edit_note_outlined),
-                selectedIcon: Icon(Icons.edit_note),
-                label: Text('Notes'),
-              ),
             ],
           ),
           const VerticalDivider(thickness: 1, width: 1),
