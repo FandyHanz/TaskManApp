@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
-import 'screens/note_screen.dart'; 
+import 'screens/note_screen.dart';
 import 'screens/setting_screen.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
   runApp(const TaskerApp());
 }
 
@@ -36,10 +38,10 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> {
   int _selectedIndex = 0;
 
-    final List<Widget> _screens = [
-    const HomeScreen(),     
-    const SettingsScreen(), 
-    const NotesScreen(),    
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const SettingsScreen(),
+    const NotesScreen(),
   ];
 
   @override
@@ -56,7 +58,8 @@ class _MainLayoutState extends State<MainLayout> {
             },
             labelType: NavigationRailLabelType.all,
             backgroundColor: Colors.black12,
-            destinations: const [ // Tambahin const biar clean
+            destinations: const [
+              // Tambahin const biar clean
               NavigationRailDestination(
                 icon: Icon(Icons.home_outlined),
                 selectedIcon: Icon(Icons.home),
