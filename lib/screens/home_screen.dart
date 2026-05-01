@@ -13,6 +13,9 @@ class _HomeScreenState extends State<HomeScreen> {
   final StorageService _storageService = StorageService();
   List<Task> _tasks = [];
   bool _isLoading = true;
+  
+  // State untuk kontrol kategori mana yang tampil (To Do / Finished)
+  bool _showFinishedCategory = false;
 
   @override
   void initState() {
@@ -20,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadAllTasks();
   }
 
-  // Load data dari JSON
+  // 1. Load data dari JSON
   Future<void> _loadAllTasks() async {
     final data = await _storageService.loadTasks();
     setState(() {
@@ -29,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  // Tambah Task Baru
+  // 2. Fungsi Tambah Task Baru (Ini yang tadi hilang)
   void _addNewTask(String title, String desc, DateTime deadline) {
     final newTask = Task(
       id: DateTime.now().millisecondsSinceEpoch,
@@ -43,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _storageService.saveTasks(_tasks);
   }
 
+  // 3. Fungsi Tandai Selesai
   void _markAsDone(int id) {
     setState(() {
       _tasks.firstWhere((t) => t.id == id).isFinished = true;
@@ -50,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _storageService.saveTasks(_tasks);
   }
 
+  // 4. Fungsi Hapus Task
   void _deleteTask(int id) {
     setState(() {
       _tasks.removeWhere((t) => t.id == id);
@@ -57,138 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _storageService.saveTasks(_tasks);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final todoTasks = _tasks.where((t) => !t.isFinished).toList();
-    final finishedTasks = _tasks.where((t) => t.isFinished).toList();
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("My Task Board"),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddTaskDialog(context),
-        child: const Icon(Icons.add),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Kolom To Do
-            Expanded(child: _buildTaskColumn("To Do", todoTasks, false)),
-            const SizedBox(width: 16),
-            // Kolom Finished
-            Expanded(child: _buildTaskColumn("Finished", finishedTasks, true)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTaskColumn(String title, List<Task> tasks, bool isFinished) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: isFinished
-                ? Colors.green.withOpacity(0.2)
-                : Colors.blue.withOpacity(0.2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Text(
-            "$title (${tasks.length})",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: isFinished ? Colors.green : Colors.blueAccent,
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Expanded(
-          child: ListView.builder(
-            itemCount: tasks.length,
-            itemBuilder: (context, index) {
-              final task = tasks[index];
-              return Card(
-                elevation: 2,
-                margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(12),
-                  title: Text(
-                    task.title,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(task.desc),
-                      const SizedBox(height: 8),
-                      // Baris 139 di kode ente mestinya bagian ini:
-                      Row(
-                        children: [
-                          const Icon(
-                            Icons.calendar_month,
-                            size: 14,
-                            color: Colors.grey,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              "${task.deadline.day}/${task.deadline.month}/${task.deadline.year}",
-                              overflow: TextOverflow
-                                  .ellipsis, 
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (!isFinished)
-                        IconButton(
-                          icon: const Icon(
-                            Icons.check_circle_outline,
-                            color: Colors.green,
-                          ),
-                          onPressed: () => _markAsDone(task.id),
-                        )
-                      else
-                        IconButton(
-                          icon: const Icon(
-                            Icons.delete_outline,
-                            color: Colors.red,
-                          ),
-                          onPressed: () => _deleteTask(task.id),
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
+  // 5. Fungsi Tampilkan Dialog Input (Ini jg tadi bikin merah)
   void _showAddTaskDialog(BuildContext context) {
     final titleController = TextEditingController();
     final descController = TextEditingController();
@@ -197,24 +71,34 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Add New Task"),
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text("New Task", style: TextStyle(color: Colors.white)),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: titleController,
-                decoration: const InputDecoration(labelText: "Task Title"),
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: "Task Title",
+                  labelStyle: TextStyle(color: Colors.grey),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.purpleAccent)),
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               TextField(
                 controller: descController,
-                decoration: const InputDecoration(labelText: "Description"),
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: "Description",
+                  labelStyle: TextStyle(color: Colors.grey),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.purpleAccent)),
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
+              // Tombol Pilih Tanggal
               ElevatedButton.icon(
-                icon: const Icon(Icons.date_range),
-                label: const Text("Select Deadline"),
                 onPressed: () async {
                   final picked = await showDatePicker(
                     context: context,
@@ -224,6 +108,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                   if (picked != null) selectedDate = picked;
                 },
+                icon: const Icon(Icons.calendar_month),
+                label: const Text("Set Deadline"),
               ),
             ],
           ),
@@ -231,22 +117,145 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
             onPressed: () {
               if (titleController.text.isNotEmpty) {
-                _addNewTask(
-                  titleController.text,
-                  descController.text,
-                  selectedDate,
-                );
+                _addNewTask(titleController.text, descController.text, selectedDate);
                 Navigator.pop(context);
               }
             },
-            child: const Text("Add Task"),
+            child: const Text("Add"),
           ),
         ],
+      ),
+    );
+  }
+
+  void tambahTask(BuildContext context) {
+    _showAddTaskDialog(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF121212),
+        body: Center(child: CircularProgressIndicator())
+      );
+    }
+
+    final currentTasks = _tasks.where((t) => t.isFinished == _showFinishedCategory).toList();
+
+    return Scaffold(
+      backgroundColor: const Color(0xFF121212),
+      appBar: AppBar(
+        title: Text(_showFinishedCategory ? "Finished Board" : "To-Do Board"),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.white,
+      ),
+      drawer: Drawer(
+        backgroundColor: const Color(0xFF1F1B24),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const SizedBox(height: 50),
+            const Icon(Icons.apps, size: 64, color: Colors.purpleAccent),
+            const SizedBox(height: 20),
+            ListTile(
+              leading: Icon(Icons.playlist_add_check_rounded, color: !_showFinishedCategory ? Colors.purpleAccent : Colors.white70),
+              title: Text("To Do List", style: TextStyle(color: !_showFinishedCategory ? Colors.purpleAccent : Colors.white70)),
+              onTap: () {
+                setState(() => _showFinishedCategory = false);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.done_all_rounded, color: _showFinishedCategory ? Colors.greenAccent : Colors.white70),
+              title: Text("Finished Board", style: TextStyle(color: _showFinishedCategory ? Colors.greenAccent : Colors.white70)),
+              onTap: () {
+                setState(() => _showFinishedCategory = true);
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddTaskDialog(context),
+        backgroundColor: Colors.purpleAccent,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+      body: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: _showFinishedCategory ? Colors.green.withOpacity(0.1) : Colors.purple.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                "${_showFinishedCategory ? "Done" : "Tasks"} (${currentTasks.length})",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold, 
+                  color: _showFinishedCategory ? Colors.greenAccent : Colors.purpleAccent
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView.builder(
+                itemCount: currentTasks.length,
+                itemBuilder: (context, index) {
+                  final task = currentTasks[index];
+                  return Card(
+                    color: const Color(0xFF1E1E1E),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(16),
+                      title: Text(
+                        task.title, 
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18)
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 8),
+                          Text(task.desc, style: const TextStyle(color: Colors.white70, fontSize: 14)), 
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              const Icon(Icons.calendar_month, size: 16, color: Colors.grey),
+                              const SizedBox(width: 6),
+                              Text(
+                                "${task.deadline.day}/${task.deadline.month}/${task.deadline.year}",
+                                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(
+                          _showFinishedCategory ? Icons.delete_sweep : Icons.check_circle,
+                          color: _showFinishedCategory ? Colors.redAccent : Colors.greenAccent,
+                          size: 28,
+                        ),
+                        onPressed: () => _showFinishedCategory ? _deleteTask(task.id) : _markAsDone(task.id),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

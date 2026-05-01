@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
-import 'screens/home_screen.dart';
-import 'widgets/sidebar.dart';
+import 'screens/note_screen.dart'; 
 import 'screens/setting_screen.dart';
 
 void main() {
@@ -17,7 +16,6 @@ class TaskerApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Tasker Local',
-      // Pakai tema dark biar lebih berasa "anak IT"
       theme: ThemeData(
         brightness: Brightness.dark,
         primarySwatch: Colors.blue,
@@ -38,15 +36,17 @@ class MainLayout extends StatefulWidget {
 class _MainLayoutState extends State<MainLayout> {
   int _selectedIndex = 0;
 
-  // List halaman yang akan ditampilkan sesuai index navigasi
-  final List<Widget> _screens = [const HomeScreen(), const SettingsScreen()];
+    final List<Widget> _screens = [
+    const HomeScreen(),     
+    const SettingsScreen(), 
+    const NotesScreen(),    
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Row(
         children: [
-          // Nav Bar di sebelah kiri (Sidebar)
           NavigationRail(
             selectedIndex: _selectedIndex,
             onDestinationSelected: (int index) {
@@ -56,7 +56,7 @@ class _MainLayoutState extends State<MainLayout> {
             },
             labelType: NavigationRailLabelType.all,
             backgroundColor: Colors.black12,
-            destinations:  [
+            destinations: const [ // Tambahin const biar clean
               NavigationRailDestination(
                 icon: Icon(Icons.home_outlined),
                 selectedIcon: Icon(Icons.home),
@@ -65,15 +65,17 @@ class _MainLayoutState extends State<MainLayout> {
               NavigationRailDestination(
                 icon: Icon(Icons.settings_outlined),
                 selectedIcon: Icon(Icons.settings),
-                label: Text('Settings')
+                label: Text('Settings'),
+              ),
+              // Tambahin destinasi buat Notes
+              NavigationRailDestination(
+                icon: Icon(Icons.edit_note_outlined),
+                selectedIcon: Icon(Icons.edit_note),
+                label: Text('Notes'),
               ),
             ],
           ),
-
-          // Garis pemisah tipis antara nav bar dan konten
           const VerticalDivider(thickness: 1, width: 1),
-
-          // Konten utama aplikasi
           Expanded(child: _screens[_selectedIndex]),
         ],
       ),

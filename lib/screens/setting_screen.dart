@@ -28,7 +28,7 @@ class SettingsScreen extends StatelessWidget {
             child: ListTile(
               leading: const Icon(Icons.delete_forever, color: Colors.redAccent),
               title: const Text("Clear All Tasks"),
-              subtitle: const Text("Menghapus semua data tugas secara permanen"),
+              subtitle: const Text("Clearing all json Data "),
               onTap: () => _showDeleteConfirmDialog(context, storageService),
             ),
           ),
@@ -48,15 +48,15 @@ class SettingsScreen extends StatelessWidget {
                 const ListTile(
                   leading: Icon(Icons.info_outline, color: Colors.blueAccent),
                   title: Text("About"),
-                  subtitle: Text("Tasker Local v1.0.0"),
+                  subtitle: Text("Tasker Local v1.1.0"),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   leading: const Icon(Icons.code, color: Colors.orangeAccent),
                   title: const Text("Developer"),
-                  subtitle: const Text("Fandy Wahyu Hanzura"),
+                  subtitle: const Text("Fandy Wahyu Hanzura / General Tenzen Yamauchi"),
                   onTap: () {
-                    // Bisa ditambahin link ke portfolio atau GitHub ente
+                    
                   },
                 ),
               ],

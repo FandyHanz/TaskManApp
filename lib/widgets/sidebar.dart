@@ -14,6 +14,7 @@ class SideNavigation extends StatelessWidget {
       labelType: NavigationRailLabelType.all,
       destinations: const [
         NavigationRailDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: Text('Home')),
+        NavigationRailDestination(icon: Icon(Icons.edit_note_outlined), selectedIcon: Icon(Icons.settings), label: Text('Notes')),
         NavigationRailDestination(icon: Icon(Icons.settings_outlined), selectedIcon: Icon(Icons.settings), label: Text('Settings')),
       ],
     );
