@@ -218,7 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     margin: const EdgeInsets.only(bottom: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     child: ListTile(
-                      onTap: () => _showTaskDialog(task: task), // EDIT PAS DI-KLIK
+                      onTap: () => _showTaskDialog(task: task), 
                       contentPadding: const EdgeInsets.all(16),
                       title: Text(task.title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 18)),
                       subtitle: Column(

@@ -84,7 +84,7 @@ class _NotesScreenState extends State<NotesScreen> {
         : _notes.isEmpty
             ? const Center(
                 child: Text(
-                  "Belum ada catatan Gan.",
+                  "Don't have any notes yet.\nTap the + button to add one!",
                   style: TextStyle(color: Colors.grey),
                 ),
               )
@@ -170,7 +170,6 @@ class _NotesScreenState extends State<NotesScreen> {
     }, "Update");
   }
 
-  // REUSABLE DIALOG BIAR GAK REPOT
   void _buildNoteDialog(BuildContext context, String title, TextEditingController tCtrl, TextEditingController cCtrl, VoidCallback onAction, String actionText) {
     showDialog(
       context: context,
