@@ -1,19 +1,20 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'dart:io';
 
 class NotificationService {
-  final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
+  
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
   NotificationService._internal();
 
-  final FlutterLocalNotificationsPlugin _notifications =
-      FlutterLocalNotificationsPlugin();
-
   Future<void> init() async {
     tz.initializeTimeZones();
+    final String timeZoneName = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(timeZoneName));
 
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -22,16 +23,15 @@ class NotificationService {
       android: androidSettings,
     );
 
-    await _notifications.initialize(
-      settings: settings,
-      onDidReceiveNotificationResponse: (NotificationResponse details) {},
-    );
+    await _notifications.initialize(settings);
+  }
 
-    await _notifications
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.requestNotificationsPermission();
+  Future<void> requestPermissions() async {
+    if (Platform.isAndroid) {
+      final androidImplementation = _notifications.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+      await androidImplementation?.requestNotificationsPermission();
+    }
   }
 
   Future<void> scheduleNotification({
@@ -41,11 +41,11 @@ class NotificationService {
     required DateTime scheduledDate,
   }) async {
     await _notifications.zonedSchedule(
-      id: id,
-      title: title,
-      body: body,
-      scheduledDate: tz.TZDateTime.from(scheduledDate, tz.local),
-      notificationDetails: const NotificationDetails(
+      id,
+      title,
+      body,
+      tz.TZDateTime.from(scheduledDate, tz.local),
+      const NotificationDetails(
         android: AndroidNotificationDetails(
           'task_deadline_channel',
           'Deadline Reminders',
@@ -53,22 +53,12 @@ class NotificationService {
           priority: Priority.high,
         ),
       ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidAllowWhileIdle: true, // v16 masih pake ini
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
   Future<void> cancelNotification(int id) async {
-    await _notifications.cancel(id: id);
+    await _notifications.cancel(id);
   }
-
-  Future<void> requestPermissions() async {
-  if (Platform.isAndroid) {
-    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-        notificationsPlugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
-
-    
-    await androidImplementation?.requestNotificationsPermission();
-  }
-}
 }
