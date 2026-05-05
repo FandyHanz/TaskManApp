@@ -191,7 +191,6 @@ class _NotesScreenState extends State<NotesScreen> {
             ),
             TextField(
               controller: cCtrl,
-              maxLines: 3,
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
                 labelText: "Content", 

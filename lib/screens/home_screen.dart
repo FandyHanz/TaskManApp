@@ -21,7 +21,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadAllTasks();
-    _notificationService.init();
+    _notificationService.init().then((_) {
+    _notificationService.requestPermissions(); 
+  });
   }
 
   Future<void> _loadAllTasks() async {
@@ -87,67 +89,94 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
   void _showTaskDialog({Task? task}) {
-    final isEdit = task != null;
-    final titleController = TextEditingController(text: isEdit ? task.title : "");
-    final descController = TextEditingController(text: isEdit ? task.desc : "");
-    DateTime selectedDate = isEdit ? task.deadline : DateTime.now().add(const Duration(days: 1));
+  final isEdit = task != null;
+  final titleController = TextEditingController(text: isEdit ? task.title : "");
+  final descController = TextEditingController(text: isEdit ? task.desc : "");
+  
+  // Default deadline pake jam sekarang
+  DateTime selectedDate = isEdit ? task.deadline : DateTime.now().add(const Duration(days: 1));
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1E1E1E),
-        title: Text(isEdit ? "Edit Task" : "New Task", style: const TextStyle(color: Colors.white)),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: titleController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(labelText: "Task Title", labelStyle: TextStyle(color: Colors.grey)),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: descController,
-                style: const TextStyle(color: Colors.white),
-                decoration: const InputDecoration(labelText: "Description", labelStyle: TextStyle(color: Colors.grey)),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: () async {
-                  final picked = await showDatePicker(
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: const Color(0xFF1E1E1E),
+      title: Text(isEdit ? "Edit Task" : "New Task", style: const TextStyle(color: Colors.white)),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: titleController,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(labelText: "Task Title", labelStyle: TextStyle(color: Colors.grey)),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: descController,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(labelText: "Description", labelStyle: TextStyle(color: Colors.grey)),
+            ),
+            const SizedBox(height: 20),
+            
+            // TOMBOL PILIH TANGGAL & JAM
+            ElevatedButton.icon(
+              onPressed: () async {
+                // 1. Pilih Tanggal
+                final date = await showDatePicker(
+                  context: context,
+                  initialDate: selectedDate,
+                  firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                  lastDate: DateTime(2030),
+                );
+                
+                if (date != null) {
+                  // 2. Pilih Jam
+                  if (!context.mounted) return;
+                  final time = await showTimePicker(
                     context: context,
-                    initialDate: selectedDate,
-                    firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                    lastDate: DateTime(2030),
+                    initialTime: TimeOfDay.fromDateTime(selectedDate),
                   );
-                  if (picked != null) setState(() => selectedDate = picked);
-                },
-                icon: const Icon(Icons.calendar_month),
-                label: const Text("Set Deadline"),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel", style: TextStyle(color: Colors.grey))),
-          ElevatedButton(
-            onPressed: () {
-              if (titleController.text.isNotEmpty) {
-                if (isEdit) {
-                  _editTask(task.id, titleController.text, descController.text, selectedDate);
-                } else {
-                  _addNewTask(titleController.text, descController.text, selectedDate);
+
+                  if (time != null) {
+                    setState(() {
+                      selectedDate = DateTime(
+                        date.year,
+                        date.month,
+                        date.day,
+                        time.hour,
+                        time.minute,
+                      );
+                    });
+                  }
                 }
-                Navigator.pop(context);
-              }
-            },
-            child: Text(isEdit ? "Update" : "Add"),
-          ),
-        ],
+              },
+              icon: const Icon(Icons.alarm),
+              label: Text(
+                "${selectedDate.day}/${selectedDate.month} - ${selectedDate.hour.toString().padLeft(2, '0')}:${selectedDate.minute.toString().padLeft(2, '0')}",
+              ),
+            ),
+          ],
+        ),
       ),
-    );
-  }
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel", style: TextStyle(color: Colors.grey))),
+        ElevatedButton(
+          onPressed: () {
+            if (titleController.text.isNotEmpty) {
+              if (isEdit) {
+                _editTask(task.id, titleController.text, descController.text, selectedDate);
+              } else {
+                _addNewTask(titleController.text, descController.text, selectedDate);
+              }
+              Navigator.pop(context);
+            }
+          },
+          child: Text(isEdit ? "Update" : "Add"),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {

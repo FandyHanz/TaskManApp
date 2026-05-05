@@ -1,8 +1,10 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'dart:io';
 
 class NotificationService {
+  final FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
   NotificationService._internal();
@@ -56,7 +58,17 @@ class NotificationService {
   }
 
   Future<void> cancelNotification(int id) async {
-    // FIX BARIS 62+: cancel jg butuh label 'id:'
     await _notifications.cancel(id: id);
   }
+
+  Future<void> requestPermissions() async {
+  if (Platform.isAndroid) {
+    final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+        notificationsPlugin.resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>();
+
+    
+    await androidImplementation?.requestNotificationsPermission();
+  }
+}
 }

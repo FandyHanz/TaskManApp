@@ -59,7 +59,6 @@ class _MainLayoutState extends State<MainLayout> {
             labelType: NavigationRailLabelType.all,
             backgroundColor: Colors.black12,
             destinations: const [
-              // Tambahin const biar clean
               NavigationRailDestination(
                 icon: Icon(Icons.home_outlined),
                 selectedIcon: Icon(Icons.home),
@@ -75,7 +74,6 @@ class _MainLayoutState extends State<MainLayout> {
                 selectedIcon: Icon(Icons.settings),
                 label: Text('Settings'),
               ),
-              // Tambahin destinasi buat Notes
             ],
           ),
           const VerticalDivider(thickness: 1, width: 1),
