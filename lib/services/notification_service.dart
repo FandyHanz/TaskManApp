@@ -2,6 +2,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
 class NotificationService {
@@ -61,4 +62,15 @@ class NotificationService {
   Future<void> cancelNotification(int id) async {
     await _notifications.cancel(id);
   }
+
+  Future<void> checkExactAlarmPermission() async {
+  if (Platform.isAndroid) {
+    var status = await Permission.scheduleExactAlarm.status;
+    if (status.isDenied) {
+      await Permission.scheduleExactAlarm.request();
+    } else if(status.isPermanentlyDenied) {
+      await openAppSettings();
+    }
+  }
+}
 }

@@ -22,7 +22,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadAllTasks();
     _notificationService.init().then((_) {
-    _notificationService.requestPermissions(); 
+    _notificationService.requestPermissions();
+    _notificationService.checkExactAlarmPermission();
   });
   }
 
