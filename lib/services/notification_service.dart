@@ -41,8 +41,9 @@ class NotificationService {
     required String body,
     required DateTime scheduledDate,
   }) async {
+    final notificationId = id.toInt();
     await _notifications.zonedSchedule(
-      id,
+      notificationId,
       title,
       body,
       tz.TZDateTime.from(scheduledDate, tz.local),

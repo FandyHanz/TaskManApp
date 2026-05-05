@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _addNewTask(String title, String desc, DateTime deadline) {
     final newTask = Task(
-      id: DateTime.now().millisecondsSinceEpoch,
+      id: DateTime.now().millisecondsSinceEpoch.remainder(100000), // ID unik berdasarkan timestamp
       title: title,
       desc: desc,
       deadline: deadline,
@@ -65,13 +65,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _scheduleTaskNotify(Task task) {
-    final reminderTime = task.deadline.subtract(const Duration(days: 1));
-    if (reminderTime.isAfter(DateTime.now())) {
+   final testTime = DateTime.now().add(const Duration(days: 10));
+    if (testTime.isAfter(DateTime.now())) {
       _notificationService.scheduleNotification(
         id: task.id,
         title: "H-1 Deadline: ",
         body: "Dont Forget! Your task \"${task.title}\" is due tomorrow.",
-        scheduledDate: reminderTime,
+        scheduledDate: testTime,
       );
     }
   }
