@@ -6,8 +6,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 
 class NotificationService {
-  final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
-  
+  final FlutterLocalNotificationsPlugin _notifications =
+      FlutterLocalNotificationsPlugin();
+
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
   NotificationService._internal();
@@ -29,8 +30,10 @@ class NotificationService {
 
   Future<void> requestPermissions() async {
     if (Platform.isAndroid) {
-      final androidImplementation = _notifications.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
+      final androidImplementation = _notifications
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       await androidImplementation?.requestNotificationsPermission();
     }
   }
@@ -51,12 +54,17 @@ class NotificationService {
         android: AndroidNotificationDetails(
           'task_deadline_channel',
           'Deadline Reminders',
+          channelDescription:
+              'Notifications for task deadlines',
           importance: Importance.max,
           priority: Priority.high,
+          ticker: 'ticker', 
         ),
       ),
-      androidAllowWhileIdle: true, // v16 masih pake ini
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      androidScheduleMode: AndroidScheduleMode
+          .exactAllowWhileIdle, 
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
     );
   }
 
@@ -65,13 +73,13 @@ class NotificationService {
   }
 
   Future<void> checkExactAlarmPermission() async {
-  if (Platform.isAndroid) {
-    var status = await Permission.scheduleExactAlarm.status;
-    if (status.isDenied) {
-      await Permission.scheduleExactAlarm.request();
-    } else if(status.isPermanentlyDenied) {
-      await openAppSettings();
+    if (Platform.isAndroid) {
+      var status = await Permission.scheduleExactAlarm.status;
+      if (status.isDenied) {
+        await Permission.scheduleExactAlarm.request();
+      } else if (status.isPermanentlyDenied) {
+        await openAppSettings();
+      }
     }
   }
-}
 }
